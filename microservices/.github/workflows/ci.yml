@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Login to ACR
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Build & Push API
+      run: |
+        docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/api:latest ./api
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/api:latest
+
+    - name: Build & Push Worker
+      run: |
+        docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/worker:latest ./worker
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/worker:latest
